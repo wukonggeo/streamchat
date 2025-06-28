@@ -18,6 +18,10 @@ login_key = 'Gemini123'
 # 初始化参数
 if 'is_authenticated' not in st.session_state:
     st.session_state.is_authenticated = False
+if 'history' not in st.session_state:
+    st.session_state.history = []
+if 'app_key' not in st.session_state:
+    st.session_state.app_key = None
 
 # 检查是否已经登录
 if not st.session_state.is_authenticated: 
@@ -30,33 +34,30 @@ if not st.session_state.is_authenticated:
             st.session_state.is_authenticated = True
             st.write("Password is correct, welcome to the app!")
             # 刷新页面，重新加载程序
-            st.experimental_rerun()
+            st.rerun()
         else:
             st.error("Password is incorrect, access denied.")
             # 刷新页面
             # st.experimental_rerun()
             # 清除密码输入框的值，以便用户重新输入
-            st.text_input("Please enter the login Key", type='password', key=f'login_key_input_{random.randint(0, 1000)}', value='')
+            # st.text_input("Please enter the login Key", type='password', key=f'login_key_input_{random.randint(0, 1000)}', value='')
 
 else:
     st.title("Chat To Gemini")
     st.caption("a chatbot, powered by google gemini pro.")
     
-    if "app_key" not in st.session_state:
-        app_key = st.text_input("Your Gemini App Key", type='password')
+    if "app_key" not in st.session_state or st.session_state.app_key is None:
+        app_key = st.text_input("Your Gemini App Key", type='password', key='gemini_key_input')
         # app_key = st.secrets["Gemini_Key"]
         if app_key:
             st.session_state.app_key = app_key
-    
-    if "history" not in st.session_state:
-        st.session_state.history = []
-    
+            st.rerun()
     try:
         genai.configure(api_key = st.session_state.app_key)
     except AttributeError as e:
         st.warning("Please Put Your Gemini App Key First.")
     # gemini-1.5-pro-latest gemini-2.0-flash-thinking-exp-01-21 gemini-2.0-flash-thinking-exp
-    model = genai.GenerativeModel('gemini-2.0-pro-exp-02-05')
+    model = genai.GenerativeModel('gemini-2.5-pro')
     chat = model.start_chat(history = st.session_state.history)
     
     with st.sidebar:
